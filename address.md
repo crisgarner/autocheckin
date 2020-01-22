@@ -1,0 +1,4 @@
+TCL: main -> poapContract.address 0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab
+TCL: main -> poapContract.deployTransaction.hash 0x1664f3fb19fddd4c8009deec4df22d441ea95a5d9b47e0049d74ac44f853c6d6
+TCL: main -> autoCheckInContract.address 0x5b1869D9A4C187F2EAa108f3062412ecf0526b24
+TCL: main -> autoCheckInContract.deployTransaction.hash 0x74a75cab07871d30ec0c7cdb89d65e96922334fe49fb0e9920a5e0eb08ce7e6f

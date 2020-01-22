@@ -3,8 +3,6 @@ pragma solidity ^0.5.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Metadata.sol";
-import "./PoapRoles.sol";
-import "./PoapPausable.sol";
 
 
     // Desired Features
@@ -16,7 +14,7 @@ import "./PoapPausable.sol";
     // - Pause contract (only admin)
     // - ERC721 full interface (base, metadata, enumerable)
 
-contract Poap is ERC721, ERC721Enumerable, PoapRoles, PoapPausable {
+contract Poap is ERC721, ERC721Enumerable {
   event EventToken(uint256 eventId, uint256 tokenId);
 
   // Token name
@@ -77,19 +75,19 @@ contract Poap is ERC721, ERC721Enumerable, PoapRoles, PoapPausable {
     return _strConcat(_baseURI, _uint2str(eventId), "/", _uint2str(tokenId), "");
   }
 
-  function setBaseURI(string memory baseURI) public onlyAdmin whenNotPaused {
+  function setBaseURI(string memory baseURI) public   {
     _baseURI = baseURI;
   }
 
-  function approve(address to, uint256 tokenId) public whenNotPaused {
+  function approve(address to, uint256 tokenId) public  {
     super.approve(to, tokenId);
   }
 
-  function setApprovalForAll(address to, bool approved) public whenNotPaused {
+  function setApprovalForAll(address to, bool approved) public  {
     super.setApprovalForAll(to, approved);
   }
 
-  function transferFrom(address from, address to, uint256 tokenId) public whenNotPaused {
+  function transferFrom(address from, address to, uint256 tokenId) public  {
     super.transferFrom(from, to, tokenId);
   }
 
@@ -100,7 +98,7 @@ contract Poap is ERC721, ERC721Enumerable, PoapRoles, PoapPausable {
     * @return A boolean that indicates if the operation was successful.
     */
   function mintToken(uint256 eventId, address to)
-      public whenNotPaused onlyEventMinter(eventId) returns (bool)
+      public returns (bool)
   {
     lastId += 1;
     return _mintToken(eventId, lastId, to);
@@ -113,7 +111,7 @@ contract Poap is ERC721, ERC721Enumerable, PoapRoles, PoapPausable {
     * @return A boolean that indicates if the operation was successful.
     */
   function mintEventToManyUsers(uint256 eventId, address[] memory to)
-      public whenNotPaused onlyEventMinter(eventId) returns (bool)
+      public returns (bool)
   {
     for (uint256 i = 0; i < to.length; ++i) {
       _mintToken(eventId, lastId + 1 + i, to[i]);
@@ -129,7 +127,7 @@ contract Poap is ERC721, ERC721Enumerable, PoapRoles, PoapPausable {
     * @return A boolean that indicates if the operation was successful.
     */
   function mintUserToManyEvents(uint256[] memory eventIds, address to)
-      public whenNotPaused onlyAdmin() returns (bool)
+      public returns (bool)
   {
     for (uint256 i = 0; i < eventIds.length; ++i) {
       _mintToken(eventIds[i], lastId + 1 + i, to);
@@ -143,20 +141,13 @@ contract Poap is ERC721, ERC721Enumerable, PoapRoles, PoapPausable {
     * @param tokenId uint256 id of the ERC721 token to be burned.
     */
   function burn(uint256 tokenId) public {
-    require(_isApprovedOrOwner(msg.sender, tokenId) || isAdmin(msg.sender));
+    require(_isApprovedOrOwner(msg.sender, tokenId));
     _burn(tokenId);
   }
 
-  constructor (string memory __name, string memory __symbol, string memory __baseURI, address[] memory admins)
+  constructor (string memory __name, string memory __symbol, string memory __baseURI)
       public
   {
-    PoapRoles(msg.sender);
-
-    // Add the requested admins
-    for (uint256 i = 0; i < admins.length; ++i) {
-      _addAdmin(admins[i]);
-    }
-
     _name = __name;
     _symbol = __symbol;
     _baseURI = __baseURI;

@@ -22,7 +22,8 @@ const config: BuidlerConfig = {
     kovan: {
       url: process.env.KOVAN_API_URL,
       accounts: { mnemonic: mnemonic }
-    }
+    },
+    localhost: { url: "http://127.0.0.1:8545/", accounts: { mnemonic: mnemonic } }
   },
   etherscan: {
     // The url for the Etherscan API you want to use.

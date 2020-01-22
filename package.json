@@ -9,7 +9,8 @@
     "compile": "npx buidler compile",
     "typechain": "npx buidler compile && typechain --outDir typechain --target ethers 'artifacts/*.json'",
     "test": "npx buidler test",
-    "ganache": "npx buidler run --network localhost scripts/deploy.ts"
+    "deploy": "npx buidler run scripts/deploy.ts",
+    "setup": "npx buidler run scripts/setup.ts"
   },
   "dependencies": {},
   "devDependencies": {
@@ -25,7 +26,7 @@
     "@types/reactstrap": "^8.2.0",
     "chai": "^4.2.0",
     "dotenv": "^8.2.0",
-    "eslint": "6.1.0",
+    "eslint": "^6.1.0",
     "eslint-config-airbnb": "18.0.1",
     "eslint-plugin-flowtype": "^4.3.0",
     "eslint-plugin-import": "^2.18.2",
