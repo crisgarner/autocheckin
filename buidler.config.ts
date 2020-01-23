@@ -19,15 +19,15 @@ const config: BuidlerConfig = {
         privateKey: acc.secretKey
       }))
     },
-    kovan: {
-      url: process.env.KOVAN_API_URL,
+    ropsten: {
+      url: process.env.ROPSTEN_API_URL,
       accounts: { mnemonic: mnemonic }
     },
     localhost: { url: "http://127.0.0.1:8545/", accounts: { mnemonic: mnemonic } }
   },
   etherscan: {
     // The url for the Etherscan API you want to use.
-    url: "https://api-kovan.etherscan.io/api",
+    url: "https://api-ropsten.etherscan.io/api",
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
     apiKey: process.env.ETHERSCAN_API_KEY as string
