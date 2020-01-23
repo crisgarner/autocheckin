@@ -1,3 +1,7 @@
+$primary: #6e76ff;
+$secondary: #5d64de;
+$other: #431d66;
+
 .App {
   text-align: center;
 }
@@ -35,4 +39,48 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.container.initial {
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  height: 100%;
+
+  button {
+    width: 200px;
+    border-radius: 0.25rem;
+    background-color: $primary;
+    border-color: $primary;
+  }
+}
+
+.main {
+  padding-top: 30px;
+  text-align: center;
+
+  .btn {
+    width: 200px;
+  }
+
+  .btn.primary {
+    background-color: $primary;
+    border-color: $primary;
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: $secondary;
+      border-color: $secondary;
+    }
+  }
+}
+ul {
+  list-style-type: none;
 }
