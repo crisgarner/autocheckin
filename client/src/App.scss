@@ -11,6 +11,10 @@ $other: #431d66;
   pointer-events: none;
 }
 
+h3 {
+  font-weight: bold !important;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
@@ -83,4 +87,5 @@ body,
 }
 ul {
   list-style-type: none;
+  padding-left: 0;
 }

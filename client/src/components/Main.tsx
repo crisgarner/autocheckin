@@ -10,11 +10,32 @@ type props = {
   autoCheckIn: ethers.Contract;
 };
 
+type token = {
+  tokenId: string;
+  tokenEvent: string;
+  approved: boolean;
+  open: boolean;
+  reedemable: boolean;
+};
+
 export const Main = ({ web3Provider, account, poap, autoCheckIn }: props) => {
   const shortAddress = addressShortener(account);
-  const [address, setAddress] = useState(shortAddress);
   const [balance, setBalance] = useState(0);
   const [tokens, setTokens] = useState();
+  const [contractTokens, setContractTokens] = useState();
+
+  let listAccounts = async (tokenEvent: string) => {
+    let accounts = await autoCheckIn.listAttendees(tokenEvent);
+    if (accounts.length > 0) {
+      let text = "";
+      accounts.forEach((account: string, index: string) => {
+        text += `${index} -> ${account} \n`;
+      });
+      alert(text);
+    } else {
+      alert("There are no Auto Check Ins");
+    }
+  };
 
   let approve = async (tokenId: string) => {
     await poap.approve(process.env.REACT_APP_AUTOCHECKIN_ADDRESS, tokenId);
@@ -25,23 +46,11 @@ export const Main = ({ web3Provider, account, poap, autoCheckIn }: props) => {
   };
 
   let checkIn = async (tokenId: string) => {
+    console.log("TCL: checkIn -> tokenId", tokenId);
     await autoCheckIn.checkIn(tokenId);
   };
 
   useEffect(() => {
-    async function fetchTokens() {
-      if (account) {
-        let balance = await poap.balanceOf(account);
-        setBalance(balance.toString());
-        let tokens: Array<Array<string>> = [];
-        for (let i = 0; i < balance; i++) {
-          let token: Array<string> = await fetchToken(i.toString());
-          tokens.push(token);
-        }
-        setTokens(tokens);
-      }
-    }
-
     async function isApproved(tokenId: string) {
       let approved = await poap.getApproved(tokenId);
       return approved == process.env.REACT_APP_AUTOCHECKIN_ADDRESS;
@@ -52,43 +61,109 @@ export const Main = ({ web3Provider, account, poap, autoCheckIn }: props) => {
       return open.toString() != "0";
     }
 
-    async function fetchToken(index: string) {
-      let tokenId = await poap.tokenOfOwnerByIndex(account, index);
+    async function isTokenOwner(tokenEvent: string, tokenId: string, address: string) {
+      let eventTokenId = await autoCheckIn.tokenToOwner(tokenEvent, address);
+      return tokenId == eventTokenId.toString();
+    }
+
+    async function fetchOpeningTime(tokenEvent: string) {
+      let openingTimeUnix = await autoCheckIn.eventOpeningTime(tokenEvent.toString());
+      if (openingTimeUnix.toString() == "0") {
+        return false;
+      }
+      let openingtime = new Date(openingTimeUnix.toString() * 1000);
+      openingtime.setDate(openingtime.getDate() + 1);
+      let now = new Date();
+      return openingtime < now;
+    }
+
+    async function fetchBalance(address: string) {
+      if (address) {
+        let balance = await poap.balanceOf(address);
+        return balance;
+      }
+    }
+
+    async function fetchToken(index: string, address: string) {
+      let tokenId = await poap.tokenOfOwnerByIndex(address, index);
       let tokenEvent = await poap.tokenEvent(tokenId);
       let approved: boolean = await isApproved(tokenId);
       let open: boolean = await isOpen(tokenEvent);
-      return [tokenId.toString(), tokenEvent.toString(), approved, open];
+      let reedemable = await fetchOpeningTime(tokenEvent);
+      let token = {
+        tokenId: tokenId.toString(),
+        tokenEvent: tokenEvent.toString(),
+        approved,
+        open,
+        reedemable
+      };
+      return token;
+    }
+
+    async function _fetchTokens(address: string, isContract: boolean) {
+      if (address) {
+        let balance = await fetchBalance(address);
+        let tokens: Array<token> = [];
+        if (!isContract) {
+          setBalance(balance.toString());
+        }
+        for (let i = 0; i < balance; i++) {
+          let token: token = await fetchToken(i.toString(), address);
+          if (isContract) {
+            if (await isTokenOwner(token.tokenEvent, token.tokenId, account)) {
+              tokens.push(token);
+            }
+          } else {
+            tokens.push(token);
+          }
+        }
+        return tokens;
+      }
+    }
+
+    async function fetchContractTokens() {
+      if (account) {
+        let tokens = await _fetchTokens(process.env.REACT_APP_AUTOCHECKIN_ADDRESS as string, true);
+        setContractTokens(tokens);
+      }
+    }
+
+    async function fetchTokens() {
+      let tokens = await _fetchTokens(account, false);
+      setTokens(tokens);
     }
 
     fetchTokens();
-  }, [address, tokens]);
+    fetchContractTokens();
+  }, [account, tokens]);
   return (
     <Container className="main">
-      <h1>{address}</h1>
-      <div>
-        <Button color="primary" className="ml-4 primary">
-          List Attendees
-        </Button>
-      </div>
+      <h1>{shortAddress}</h1>
       <div className="balances mt-4">
         <h3>Poap Tokens: {balance}</h3>
         {tokens && tokens.length > 0 && (
           <ul>
-            {tokens.map((token: any, index: any) => (
+            {tokens.map((token: token, index: any) => (
               <li key={index}>
                 <p>
-                  <b>Event Id:</b> {token[0]}
+                  <b>Event Id:</b> {token.tokenEvent} <b>Token Id:</b> {token.tokenId}
                 </p>
-                <p>
-                  <b>Token Id:</b> {token[1]}
-                </p>
+                <Button
+                  color="primary"
+                  className="mb-4 primary"
+                  onClick={() => {
+                    listAccounts(token.tokenEvent);
+                  }}
+                >
+                  List Attendees
+                </Button>
                 <div className="mb-4">
-                  {!token[3] ? (
+                  {!token.open ? (
                     <Button
                       color="primary"
                       className="primary"
                       onClick={() => {
-                        open(token[1]);
+                        open(token.tokenEvent);
                       }}
                     >
                       Open Event
@@ -98,12 +173,12 @@ export const Main = ({ web3Provider, account, poap, autoCheckIn }: props) => {
                       Is Open!
                     </Button>
                   )}
-                  {!token[2] ? (
+                  {!token.approved ? (
                     <Button
                       color="primary"
                       className="ml-4  primary"
                       onClick={() => {
-                        approve(token[1]);
+                        approve(token.tokenId);
                       }}
                     >
                       Approve
@@ -113,12 +188,12 @@ export const Main = ({ web3Provider, account, poap, autoCheckIn }: props) => {
                       Approved!
                     </Button>
                   )}
-                  {token[3] && token[2] ? (
+                  {token.open && token.approved ? (
                     <Button
                       color="primary"
                       className=" ml-4 primary"
                       onClick={() => {
-                        checkIn(token[1]);
+                        checkIn(token.tokenId);
                       }}
                     >
                       Check In
@@ -134,6 +209,47 @@ export const Main = ({ web3Provider, account, poap, autoCheckIn }: props) => {
           </ul>
         )}
       </div>
+      {contractTokens && contractTokens.length > 0 && (
+        <div className="balances mt-4">
+          <h3>Staked Tokens: {contractTokens ? contractTokens.length : 0}</h3>
+
+          <ul>
+            {contractTokens.map((token: token, index: any) => (
+              <li key={index}>
+                <p>
+                  <b>Event Id:</b> {token.tokenEvent} <b>Token Id:</b> {token.tokenId}
+                </p>
+                <Button
+                  color="primary"
+                  className="mb-4 primary"
+                  onClick={() => {
+                    listAccounts(token.tokenEvent);
+                  }}
+                >
+                  List Attendees
+                </Button>
+                <div className="mb-4">
+                  {token.reedemable ? (
+                    <Button
+                      color="primary"
+                      className="primary"
+                      onClick={() => {
+                        // open(token[1]);
+                      }}
+                    >
+                      Reclaim Token
+                    </Button>
+                  ) : (
+                    <Button color="primary" className="primary" disabled>
+                      Wait 24h to Reclaim
+                    </Button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </Container>
   );
 };

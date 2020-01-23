@@ -43,8 +43,15 @@ const App: React.FC = () => {
   return (
     <Container className="initial">
       <Web3Connect.Button
-        network="localhost" // optional
-        providerOptions={{}}
+        network="ropsten" // optional
+        providerOptions={{
+          walletconnect: {
+            package: WalletConnectProvider, // required
+            options: {
+              infuraId: process.env.REACT_APP_INFURA_ID // required
+            }
+          }
+        }}
         onConnect={async (networkProvider: ethers.providers.Web3Provider) => {
           let provider = new ethers.providers.Web3Provider(networkProvider);
           setProvider(provider);
