@@ -18,5 +18,6 @@ This project uses POAP Tokens as stake in order to allow users to auto check-in 
 I used Infura API to deploy the contracts to ropsten and connect to Ethers.js and walletconect. The screenshot is empty since by mistake I used a wrong API and didn't log the transactions.
 
 **Emai:** ceegarner@gmail.com
+
 **Screenshot:**
 ![Screenshot from 2020-01-23 16-56-52](https://user-images.githubusercontent.com/578688/73031449-c1785680-3e01-11ea-9b26-ae8ebcae8a62.png)
