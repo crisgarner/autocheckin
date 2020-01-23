@@ -15,7 +15,7 @@ This project uses POAP Tokens as stake in order to allow users to auto check-in 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/yZW1296mD3I/0.jpg)](https://www.youtube.com/watch?v=yZW1296mD3I)
 
 ### Infura API Signup And Usage Prize
-I used Infura API to deploy the contracts to ropsten and connect to Ethers.js and walletconect. The screenshot is empty since by mistake I used a wrong API and didn't log the transactions.
+I used Infura API to deploy the contracts to Ropsten and connect to Ethers.js and walletconnect. The screenshot is empty since by mistake I used a wrong API and didn't log the transactions.
 
 **Emai:** ceegarner@gmail.com
 
